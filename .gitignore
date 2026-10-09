@@ -1,0 +1,114 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment
+venv/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Data files
+data/raw/*.csv
+data/interim/*.csv
+data/processed/*.csv
+data/models/*.joblib
+data/models/*.pkl
+data/models/*.json
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Virtual environment
+venv/
+ENV/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Python
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Environment files for documentation
+doc/_build/
+doc/_static/
+doc/_templates/
+
+# Temporary files
+*.tmp
+*.temp
+*.temp.*
+Thumbs.db
+.DS_Store
+
+# Model training artifacts
+checkpoints/
+tensorboard/
+wandb/
