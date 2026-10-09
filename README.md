@@ -1,308 +1,196 @@
-<<<<<<< HEAD
-# ThermoCareAI
-
-ThermoCareAI is a project for [describe your project purpose here].
-
-## Features
-- Add project features here.
-
-## Getting Started
-1. Clone the repository.
-2. Install the required dependencies.
-3. Configure environment variables if needed.
-4. Run the application using the appropriate command.
-
-## Project Structure
-
-```text
-ThermoCareAI/
-ÃÄÄ docs/
-³   ÀÄÄ api-contract.md
-ÃÄÄ .gitignore
-ÀÄÄ README.md
-```
-
-## Documentation
-- [API Contract](docs/api-contract.md)
-
-## License
-Add your license information here.
-=======
 # ThermoCare AI
 
-A standalone machine learning service for forecasting healthcare demand associated with extreme heat in England.
+ThermoCare AI helps hospitals anticipate heat-related demand surges. It combines weather signals, capacity data, and ML forecasts so operations teams can see risk early and act before beds run out.
 
-## Overview
+> **Demo mode:** Out of the box the app runs on clearly labelled synthetic data. No Supabase credentials or ML artifact are required to explore the UI and API.
 
-ThermoCare AI predicts healthcare demand patterns during extreme heat events using weather data, historical healthcare utilization, and demographic information. The service provides:
+---
 
-- Real-time weather data integration
-- Healthcare demand forecasting
-- Resource planning recommendations
-- RESTful API for integration
+## Features
 
-## Technology Stack
+- **Hospital monitoring** ? live capacity, occupancy, and risk status (`green` / `amber` / `red` / `critical`)
+- **Demand forecasting** ? multi-day admission predictions with confidence bands
+- **Heatwave analysis** ? weather observations linked to hospital regions
+- **Alerts** ? capacity-risk alerts when forecasted demand threatens beds
+- **Model metrics** ? MAE, RMSE, R? and training window for the forecast model
+- **Graceful fallback** ? if the database or ML model is unavailable, the stack serves demo data and surfaces a demo banner
 
-- **Backend**: FastAPI with Uvicorn
-- **ML**: scikit-learn, pandas, NumPy
-- **API**: Pydantic for validation
-- **Testing**: pytest
-- **Deployment Ready**: Docker containerization ready
+---
 
-## Project Structure
+## Tech stack
 
-```
-ThermoCareAI/
-├── app/                    # Application code
-│   ├── main.py            # FastAPI application entry point
-│   ├── config.py          # Configuration management
-│   ├── schemas/           # Pydantic models
-│   │   ├── forecast.py
-│   │   ├── weather.py
-│   │   └── hospital.py
-│   ├── api/               # API routes
-│   │   └── routes.py
-│   ├── services/          # Business logic
-│   │   ├── weather_service.py
-│   │   ├── forecast_service.py
-│   │   ├── hospital_service.py
-│   │   └── resource_planning.py
-│   └── ml/                # Machine learning components
-│       ├── data_loader.py
-│       ├── validation.py
-│       ├── preprocessing.py
-│       ├── features.py
-│       ├── train.py
-│       ├── evaluate.py
-│       ├── predict.py
-│       └── model_registry.py
-├── data/                  # Data directories
-│   ├── raw/               # Raw datasets
-│   ├── interim/           # Intermediate data
-│   ├── processed/         # Processed data
-│   ├── models/            # Trained models
-│   └── reports/           # Generated reports
-├── scripts/               # Utility scripts
-├── tests/                 # Test suite
-├── requirements.txt       # Python dependencies
-├── .env.example          # Environment variable template
-└── .gitignore            # Git ignore rules
+| Layer | Stack |
+|---|---|
+| Frontend | React 18, Vite 6, React Router 6, Recharts, Axios |
+| Backend | FastAPI, Pydantic, Uvicorn |
+| Database | PostgreSQL (Supabase) with RLS |
+| ML | joblib model artifact (optional; demo mode without it) |
+
+---
+
+## Project structure
+
+```text
+heatshield/
+??? frontend/          # React + Vite dashboard
+??? backend/           # FastAPI API (app/, tests/)
+??? database/          # SQL migrations V001?V008
+??? docs/              # API contract and docs
 ```
 
-## Installation (Windows)
+---
 
-### Prerequisites
+## Prerequisites
 
-- Python 3.11 or higher
-- PowerShell (for Windows)
+- **Node.js** 18+ and npm 9+
+- **Python** 3.11+
+- Git
 
-### Step 1: Create Virtual Environment
+---
 
-Open PowerShell in the project directory and run:
+## Quick start
 
-```powershell
-# Create virtual environment
-python -m venv venv
+### 1. Clone
 
-# Activate virtual environment
-.\venv\Scripts\Activate.ps1
-
-# Verify activation (prompt should show (venv))
-python --version
+```bash
+git clone https://github.com/Prathmeshdongale/heatshield.git
+cd heatshield
 ```
 
-### Step 2: Install Dependencies
+### 2. Backend
 
-With the virtual environment activated:
+```bash
+cd backend
+python -m venv .venv
 
-```powershell
-# Upgrade pip
-python -m pip install --upgrade pip
+# Windows (PowerShell)
+.\.venv\Scripts\Activate.ps1
 
-# Install dependencies from requirements.txt
+# macOS / Linux
+# source .venv/bin/activate
+
 pip install -r requirements.txt
-```
+copy .env.example .env   # Windows
+# cp .env.example .env   # macOS / Linux
 
-### Step 3: Configure Environment
-
-```powershell
-# Copy environment example file
-Copy-Item .env.example .env
-
-# Edit .env with your configuration (optional - uses defaults)
-notepad .env
-```
-
-## Development
-
-### Running the Development Server
-
-With the virtual environment activated:
-
-```powershell
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-The API will be available at `http://localhost:8000`.
+API: http://localhost:8000  
+Swagger: http://localhost:8000/docs
 
-### API Documentation
+### 3. Frontend
 
-Once the server is running:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+In a second terminal:
 
-### Running Tests
+```bash
+cd frontend
+npm install
+copy .env.example .env   # Windows
+# cp .env.example .env   # macOS / Linux
 
-```powershell
-# Run all tests
+npm run dev
+```
+
+App: http://localhost:5173
+
+`frontend/.env` should contain:
+
+```dotenv
+VITE_API_BASE_URL=http://localhost:8000/api/v1
+```
+
+---
+
+## Environment variables
+
+### Backend (`backend/.env`)
+
+| Variable | Required | Default | Notes |
+|---|---|---|---|
+| `APP_ENV` | no | `development` | |
+| `APP_HOST` | no | `0.0.0.0` | |
+| `APP_PORT` | no | `8000` | |
+| `SECRET_KEY` | prod | `change-me` | Change before deploy |
+| `CORS_ORIGINS` | no | `http://localhost:5173` | Comma-separated |
+| `SUPABASE_URL` | live only | empty | Publishable / anon key project URL |
+| `SUPABASE_PUBLISHABLE_KEY` | live only | empty | **Never** use the service-role key |
+| `DEMO_MODE` | no | `true` | Set `false` when DB + ML are connected |
+| `ML_MODEL_PATH` | live only | `../ml/artifacts/model.joblib` | Path to joblib artifact |
+
+### Frontend (`frontend/.env`)
+
+| Variable | Required | Notes |
+|---|---|---|
+| `VITE_API_BASE_URL` | no | e.g. `http://localhost:8000/api/v1`. If unset, the UI uses synthetic demo data. |
+
+**Never commit `.env` files.** Never put Supabase service-role keys or other secrets in the frontend.
+
+---
+
+## API overview
+
+Base URL: `http://localhost:8000/api/v1`
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/health` | Liveness check |
+| `GET` | `/hospitals` | List hospitals + capacity / risk |
+| `GET` | `/hospitals/{id}` | Hospital detail |
+| `GET` | `/forecasts?hospital_id=&days=` | Demand forecast |
+| `GET` | `/weather?hospital_id=&days=` | Weather observations |
+| `GET` | `/alerts` | Active capacity-risk alerts |
+| `GET` | `/metrics` | ML model evaluation metrics |
+
+Full request/response shapes: [docs/api-contract.md](docs/api-contract.md).
+
+---
+
+## Database
+
+PostgreSQL is hosted on Supabase. Migrations live in `database/migrations/` (`V001` ? `V008`). Apply them in order via the Supabase SQL editor, Supabase CLI, or `psql`.
+
+See [database/README.md](database/README.md) for table summaries, RLS notes, and seed guidance. `V008` demo seed is for development/staging only.
+
+When Supabase is not configured, repositories fall back to demo data automatically.
+
+---
+
+## Running tests
+
+```bash
+# Backend
+cd backend
+.\.venv\Scripts\Activate.ps1   # or source .venv/bin/activate
 pytest
 
-# Run specific test file
-pytest tests/test_health.py
-
-# Run with coverage
-pytest --cov=app --cov-report=html
-
-# Run with verbose output
-pytest -v
+# Frontend
+cd frontend
+npm run test
 ```
 
-## API Endpoints
+---
 
-### Public Endpoints
+## Useful links (local)
 
-- `GET /health` - Health check endpoint (returns application status)
-- `GET /api/v1/model/status` - Model status and version information
+| Resource | URL |
+|---|---|
+| Dashboard | http://localhost:5173 |
+| API | http://localhost:8000/api/v1 |
+| Swagger UI | http://localhost:8000/docs |
+| ReDoc | http://localhost:8000/redoc |
 
-### Forecasting Endpoints
+---
 
-- `POST /api/v1/forecast` - Generate demand forecast
-  ```json
-  {
-    "date": "2023-08-15",
-    "location": "London",
-    "temperature": 30.0,
-    "humidity": 60.0,
-    "weather_condition": "hot"
-  }
-  ```
+## Documentation
 
-- `POST /api/v1/forecast/batch` - Generate multiple forecasts
+- [API contract](docs/api-contract.md)
+- [Backend integration guide](backend/INTEGRATION.md)
+- [Frontend setup](frontend/FRONTEND_SETUP.md)
+- [Database layer](database/README.md)
 
-### Weather Endpoints
-
-- `POST /api/v1/weather` - Fetch weather data
-
-### Hospital Endpoints
-
-- `POST /api/v1/hospital/demand` - Project hospital demand
-- `POST /api/v1/hospital/resources` - Get resource recommendations
-
-## Configuration
-
-Environment variables (configured in `.env` file):
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `APP_ENV` | Application environment | `development` |
-| `API_HOST` | API server host | `0.0.0.0` |
-| `API_PORT` | API server port | `8000` |
-| `MODEL_DIR` | Model storage directory | `data/models` |
-| `DATA_DIR` | Data directory root | `data` |
-| `REPORTS_DIR` | Reports directory | `data/reports` |
-| `DEFAULT_LATITUDE` | Default latitude (London) | `51.5074` |
-| `DEFAULT_LONGITUDE` | Default longitude (London) | `-0.1278` |
-| `DEFAULT_TIMEZONE` | Default timezone | `Europe/London` |
-| `ALLOWED_ORIGINS` | CORS allowed origins | `["http://localhost:3000", "http://localhost:8080"]` |
-| `WEATHER_PROVIDER` | Weather provider | `met_office` |
-| `FORECAST_HORIZON_DAYS` | Forecast days | `7` |
-| `LOG_LEVEL` | Logging level | `INFO` |
-
-### Environment Variables for Weather Providers
-
-**OpenWeatherMap:**
-```
-WEATHER_API_BASE_URL=https://api.openweathermap.org/data/2.5
-WEATHER_API_KEY=your_api_key_here
-```
-
-**VisualCrossing:**
-```
-WEATHER_API_BASE_URL=https://weather.visualcrossing.com/VisualCrossingWebServices/rest-services
-WEATHER_API_KEY=your_api_key_here
-```
-
-## Model Pipeline
-
-1. **Data Loading**: Load raw weather and healthcare data
-2. **Validation**: Validate data quality and completeness
-3. **Preprocessing**: Clean and normalize data
-4. **Feature Engineering**: Create predictive features
-5. **Training**: Train forecasting models
-6. **Evaluation**: Assess model performance
-7. **Prediction**: Generate forecasts
-8. **Resource Planning**: Recommend resource allocation
-
-## Data Requirements
-
-Raw datasets should include:
-
-- Weather data (temperature, humidity, precipitation)
-- Historical healthcare utilization (A&E visits, hospital admissions)
-- Demographic information
-- Calendar features (season, holidays)
-
-## Important Notes
-
-### Model Status
-
-The application starts **without** a trained model. The API will report:
-
-- `/health`: Model status as "not_loaded"
-- `/api/v1/model/status`: Returns model unavailable status
-- Prediction endpoints: Return 503 Service Unavailable
-
-This design allows the API to function for health checks and configuration even before model training.
-
-### Adding a Trained Model
-
-To enable predictions:
-
-1. Train a model using the training scripts
-2. Save the model to `data/models/` directory
-3. The application will automatically load the latest model on startup
-
-## Troubleshooting
-
-### Virtual Environment Issues
-
-```powershell
-# Deactivate virtual environment
-deactivate
-
-# Remove and recreate
-Remove-Item -Recurse -Force venv
-python -m venv venv
-```
-
-### Permission Errors
-
-```powershell
-# Set execution policy for script execution
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
-### Dependency Installation Issues
-
-```powershell
-# Upgrade pip first
-python -m pip install --upgrade pip
-
-# Install with verbose output
-pip install -r requirements.txt -v
-```
+---
 
 ## License
 
-MIT License
->>>>>>> origin/feature/ml-service
+Add license information here.
