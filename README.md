@@ -1,6 +1,6 @@
-# HeatShield
+# ThermoCareAI
 
-HeatShield is a project for [describe your project purpose here].
+ThermoCareAI is a project for [describe your project purpose here].
 
 ## Features
 - Add project features here.
@@ -14,11 +14,11 @@ HeatShield is a project for [describe your project purpose here].
 ## Project Structure
 
 ```text
-heatshield/
-ÃÄÄ docs/
-³   ÀÄÄ api-contract.md
-ÃÄÄ .gitignore
-ÀÄÄ README.md
+ThermoCareAI/
+ÃƒÃ„Ã„ docs/
+Â³   Ã€Ã„Ã„ api-contract.md
+ÃƒÃ„Ã„ .gitignore
+Ã€Ã„Ã„ README.md
 ```
 
 ## Documentation
