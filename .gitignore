@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Build outputs
+dist/
+build/
+out/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Coverage
+coverage/
+
+# IDE and editor files
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
