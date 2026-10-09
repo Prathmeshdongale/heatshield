@@ -2,26 +2,19 @@
  * useApiData.js
  *
  * Generic React hook that wraps any async service function and manages
- * loading / error / demo state consistently across all pages.
+ * loading / error state consistently across all pages.
  *
- * Usage:
- *   const { data, loading, error, isDemo, refetch } =
- *     useApiData(fetchCurrentWeather, [], { fallback: null });
+ * KEY BEHAVIOUR: re-fetches automatically whenever `args` values change.
+ * This is the fix for the hospital-selector not triggering a new fetch.
  *
  * Parameters:
- *   serviceFn  {Function}  — async service function to call (from *Service.js)
- *   args       {Array}     — arguments forwarded to serviceFn on every call
+ *   serviceFn  {Function}  — async service function
+ *   args       {Array}     — arguments forwarded to serviceFn; re-fetch fires when these change
  *   options    {Object}
- *     fallback   {any}     — value used while loading (default null)
- *     enabled    {boolean} — set false to skip the call entirely (default true)
+ *     fallback   {any}     — value while loading (default null)
+ *     enabled    {boolean} — skip the call when false (default true)
  *
- * Returned:
- *   data     — the resolved payload (or fallback while loading)
- *   loading  — true during the first fetch
- *   error    — ApiError | null
- *   isDemo   — true when data came from the demo fallback
- *   source   — 'api' | 'demo'
- *   refetch  — call to re-run the service function
+ * Returns: { data, loading, error, isDemo, source, refetch }
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -35,9 +28,13 @@ export function useApiData(serviceFn, args = [], { fallback = null, enabled = tr
     source:  null,
   });
 
-  // Stable reference to args so effect doesn't loop on every render
+  // Keep a current copy of args so the run fn always uses latest values
   const argsRef = useRef(args);
   argsRef.current = args;
+
+  // Serialise args to a stable string — used as useEffect dependency
+  // so ANY change to any arg value triggers a re-fetch
+  const argsKey = JSON.stringify(args);
 
   const run = useCallback(async () => {
     if (!enabled) return;
@@ -48,20 +45,14 @@ export function useApiData(serviceFn, args = [], { fallback = null, enabled = tr
         data:    result.data ?? fallback,
         loading: false,
         error:   result.isDemo ? null : (result.error ?? null),
-        isDemo:  result.isDemo,
+        isDemo:  result.isDemo ?? false,
         source:  result.source,
       });
     } catch (err) {
-      // Unexpected throw — services should not throw, but guard anyway
-      setState((s) => ({
-        ...s,
-        loading: false,
-        error:   err,
-        isDemo:  false,
-      }));
+      setState((s) => ({ ...s, loading: false, error: err, isDemo: false }));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serviceFn, enabled]);
+  }, [serviceFn, enabled, argsKey]);   // ← argsKey here is the fix
 
   useEffect(() => { run(); }, [run]);
 

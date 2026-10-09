@@ -140,14 +140,14 @@ FastAPI default — returned when query params fail `ge`/`le` constraints.
 ---
 
 ### GET /weather
-**Purpose:** Daily weather observations for the region linked to a hospital.
+**Purpose:** Daily temperature and humidity for the region linked to a hospital, fetched live from [Open-Meteo](https://open-meteo.com/) (open-source weather API, no API key).
 
 **Query params:**
 
 | Param | Type | Required | Default | Constraints |
 |---|---|---|---|---|
-| `hospital_id` | string | yes | — | must be a known ID |
-| `days` | integer | no | 7 | 1–14 |
+| `hospital_id` | string | yes | — | used to resolve lat/lon (London/Manchester defaults if unknown) |
+| `days` | integer | no | 7 | 1–92 |
 
 **Response 200:**
 ```json
@@ -166,11 +166,11 @@ FastAPI default — returned when query params fail `ge`/`le` constraints.
       }
     ]
   },
-  "status": { "data_source": "demo", "note": "DEMO DATA — not real hospital information" }
+  "status": { "data_source": "live", "note": "Live temperature and humidity from Open-Meteo" }
 }
 ```
 
-**Response 404:** hospital not found
+**Response 503:** Open-Meteo unreachable (`WEATHER_UNAVAILABLE`)
 **Response 422:** `days` out of range or `hospital_id` missing
 
 ---

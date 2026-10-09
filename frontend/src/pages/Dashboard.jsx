@@ -47,9 +47,9 @@ function computeSummary(weatherCurrent, hospitals, demandSeries) {
 }
 
 function Dashboard() {
-  const weather     = useApiData(fetchCurrentWeather,       []);
-  const weatherHist = useApiData(fetchWeatherHistory,       [7]);
-  const demand      = useApiData(fetchCombinedDemandSeries, [14, 7]);
+  const weather     = useApiData(fetchCurrentWeather,       ['H001']);
+  const weatherHist = useApiData(fetchWeatherHistory,       [7, 'H001']);
+  const demand      = useApiData(fetchCombinedDemandSeries, [14, 7, 'H001']);
   const hospitals   = useApiData(fetchAllHospitalsWithRisk, []);
   const alerts      = useApiData(fetchAlerts,               []);
 
@@ -113,17 +113,17 @@ function Dashboard() {
         <MetricCard title="Temperature"
           value={weather.data?.temp_c ?? '—'} unit="°C"
           description="Current observation" icon="🌤️"
-          loading={weather.loading} source="Supabase" />
+          loading={weather.loading} source="Open-Meteo" />
         <MetricCard title="Heat Index"
           value={weather.data?.heat_index ?? '—'} unit="°C"
           description="Apparent temperature" icon="🔥"
           trend={(weather.data?.heat_index ?? 0) >= 41 ? 'up' : 'neutral'}
           trendLabel={(weather.data?.heat_index ?? 0) >= 41 ? 'Danger zone' : 'Normal'}
           accentColor={(weather.data?.heat_index ?? 0) >= 41 ? '#ef4444' : '#22c55e'}
-          loading={weather.loading} source="Supabase" />
+          loading={weather.loading} source="Open-Meteo" />
         <MetricCard title="Humidity"
           value={weather.data?.humidity_pct ?? '—'} unit="%"
-          icon="💧" loading={weather.loading} source="Supabase" />
+          icon="💧" loading={weather.loading} source="Open-Meteo" />
       </section>
 
       {/* Demand chart + alerts */}
@@ -155,6 +155,7 @@ function Dashboard() {
         data={weatherHist.data ?? []}
         loading={weatherHist.loading}
         error={!!weatherHist.error}
+        location="London (H001)"
       />
 
       <RiskTable

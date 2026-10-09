@@ -1,5 +1,6 @@
 /**
- * weatherService.js — fetches weather data directly from the API. No demo fallback.
+ * weatherService.js — fetches live temperature and humidity from the backend
+ * (Open-Meteo). No demo fallback.
  */
 
 import apiClient, { ApiError } from './client.js';

@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     supabase_url:             str = ""
     supabase_publishable_key: str = ""
 
+    # Open-Meteo (open-source weather API — no key required)
+    open_meteo_url: str = "https://api.open-meteo.com/v1/forecast"
+    weather_timezone: str = "Europe/London"
+
     # Demo mode
     demo_mode: bool = False
 

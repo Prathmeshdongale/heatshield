@@ -232,7 +232,7 @@ function Settings() {
       <SettingsSection title="About HeatShield">
         <dl className="about-list">
           <dt>Version</dt>         <dd>1.0.0</dd>
-          <dt>Data source</dt>     <dd>Supabase (live database)</dd>
+          <dt>Data source</dt>     <dd>Supabase (hospitals); Open-Meteo (temperature & humidity)</dd>
           <dt>Frontend stack</dt>  <dd>React 18, Vite 6, React Router 6, Recharts, Axios</dd>
           <dt>Backend stack</dt>   <dd>FastAPI, Python 3.12, httpx, Pydantic v2</dd>
           <dt>API contract</dt>    <dd>See <code>docs/api-contract.md</code> in the repository.</dd>
