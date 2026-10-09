@@ -2,6 +2,15 @@
 node_modules/
 vendor/
 
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
 # Environment variables and secrets
 .env
 .env.*
@@ -18,6 +27,8 @@ npm-debug.log*
 
 # Coverage
 coverage/
+.coverage
+htmlcov/
 
 # IDE and editor files
 .vscode/
@@ -27,3 +38,8 @@ coverage/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# ML artifacts — never commit trained models to Git
+*.joblib
+*.pkl
+ml/artifacts/
