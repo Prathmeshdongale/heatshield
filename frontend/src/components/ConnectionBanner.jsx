@@ -1,43 +1,79 @@
 import React from 'react';
 import { BASE_URL } from '../api/client.js';
+import { useHealthCheck, invalidateHealthCache } from '../api/useHealthCheck.js';
 
 /**
- * ConnectionBanner — shown at the top of a page when it is rendering demo data
- * instead of live API data.
- *
- * Props:
- *   isDemo   {boolean}   — show the banner
- *   error    {ApiError|null} — the error that caused the fallback (optional)
- *   onRetry  {Function}  — optional retry callback
+ * ConnectionBanner — shown only when the backend or DB is unavailable.
+ * Hidden entirely when everything is working correctly.
  */
-function ConnectionBanner({ isDemo, error, onRetry }) {
-  if (!isDemo) return null;
+function ConnectionBanner({ error, onRetry }) {
+  const { isLive, dbConnected, loading } = useHealthCheck();
 
-  const isNetwork = error?.isNetwork;
-  const isTimeout = error?.isTimeout;
+  if (loading) return null;
 
-  let reason = 'Backend not configured.';
-  if (isNetwork) reason = `Cannot reach backend at ${BASE_URL}.`;
-  else if (isTimeout) reason = `Request to ${BASE_URL} timed out.`;
-  else if (error?.status) reason = `Backend returned HTTP ${error.status}.`;
+  // Everything is fine — hide the banner
+  if (isLive && dbConnected) return null;
 
-  return (
-    <div className="conn-banner" role="status" aria-live="polite">
-      <span className="conn-banner__icon" aria-hidden="true">🔌</span>
-      <div className="conn-banner__body">
-        <strong>Showing demo data.</strong>
-        {' '}
-        <span className="conn-banner__reason">{reason}</span>
-        {' '}
-        Set <code>VITE_API_BASE_URL</code> in <code>.env</code> to connect the backend.
+  // Backend not reachable
+  if (!isLive) {
+    const reason = error?.isTimeout
+      ? `Request to ${BASE_URL} timed out.`
+      : error?.status
+      ? `Backend returned HTTP ${error.status}.`
+      : `Cannot reach backend at ${BASE_URL}.`;
+
+    return (
+      <div className="conn-banner" role="alert" aria-live="assertive">
+        <span className="conn-banner__icon" aria-hidden="true">🔌</span>
+        <div className="conn-banner__body">
+          <strong>Backend unavailable.</strong>{' '}
+          <span className="conn-banner__reason">{reason}</span>
+          {' '}Check that the backend is running on port 8000.
+        </div>
+        {onRetry && (
+          <button
+            className="conn-banner__retry btn btn-ghost"
+            onClick={() => { invalidateHealthCache(); onRetry(); }}
+          >
+            Retry
+          </button>
+        )}
       </div>
-      {onRetry && (
-        <button className="conn-banner__retry btn btn-ghost" onClick={onRetry}>
-          Retry
-        </button>
-      )}
-    </div>
-  );
+    );
+  }
+
+  // Backend up but DB tables missing
+  if (!dbConnected) {
+    return (
+      <div className="conn-banner conn-banner--demo-mode" role="status" aria-live="polite">
+        <span className="conn-banner__icon" aria-hidden="true">🗄️</span>
+        <div className="conn-banner__body">
+          <strong>Database not ready.</strong>{' '}
+          <span className="conn-banner__reason">
+            Run <code>database/migrations/FULL_SETUP.sql</code> in the{' '}
+            <a
+              href="https://supabase.com/dashboard/project/ehzqfftrhbvdklswicmj/sql/new"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Supabase SQL Editor
+            </a>{' '}
+            to create the tables and seed data.
+          </span>
+        </div>
+        {onRetry && (
+          <button
+            className="conn-banner__retry btn btn-ghost"
+            onClick={() => { invalidateHealthCache(); onRetry(); }}
+          >
+            Retry
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return null;
 }
 
 export default ConnectionBanner;

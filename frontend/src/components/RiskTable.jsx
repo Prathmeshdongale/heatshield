@@ -10,10 +10,15 @@ import React from 'react';
  */
 
 const RISK_META = {
+  // UI-side keys (from normalised mapper in hospitalService)
   low:      { color: '#22c55e', bg: '#f0fdf4' },
   medium:   { color: '#f59e0b', bg: '#fffbeb' },
   high:     { color: '#ef4444', bg: '#fef2f2' },
   critical: { color: '#7c3aed', bg: '#faf5ff' },
+  // Backend-side aliases (safety net)
+  green:    { color: '#22c55e', bg: '#f0fdf4' },
+  amber:    { color: '#f59e0b', bg: '#fffbeb' },
+  red:      { color: '#ef4444', bg: '#fef2f2' },
 };
 
 function RiskBadge({ level }) {
@@ -62,7 +67,6 @@ function RiskTable({ rows = [], loading = false, error = false }) {
     <div className="risk-table-wrapper" role="region" aria-label="Hospital capacity risk table">
       <div className="risk-table-header">
         <h2 className="chart-title" style={{ margin: 0 }}>Hospital Capacity &amp; Risk</h2>
-        <span className="demo-badge">DEMO DATA</span>
       </div>
 
       {error && (

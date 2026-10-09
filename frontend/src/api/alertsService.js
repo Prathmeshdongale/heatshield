@@ -1,52 +1,36 @@
 /**
- * alertsService.js
- *
- * The agreed API contract (docs/api-contract.md) does not define an alerts
- * endpoint. This service is a placeholder that:
- *   1. Tries GET /alerts if the backend team adds it in the future.
- *   2. Falls back to demo alerts in the meantime.
- *
- * When the backend team adds an alerts endpoint they should update
- * docs/api-contract.md first; this service will then be updated to match.
- *
- * Demo data: src/data/demoDashboard.js → DEMO_ALERTS
+ * alertsService.js — fetches alerts and health data directly from the API. No demo fallback.
  */
 
-import { callApi, withDemoFallback } from './serviceHelpers.js';
-import { DEMO_ALERTS } from '../data/demoDashboard.js';
+import apiClient, { ApiError } from './client.js';
+
+async function call(fn) {
+  try {
+    const res = await fn(apiClient);
+    return { data: res, error: null, isDemo: false, source: 'api' };
+  } catch (err) {
+    const e = err instanceof ApiError ? err : new ApiError({ message: String(err), raw: err });
+    return { data: null, error: e, isDemo: false, source: 'api' };
+  }
+}
 
 function mapAlert(raw) {
   return {
-    id:        raw.id,
+    id:        raw.alert_id,
     severity:  raw.severity,
     message:   raw.message,
-    timestamp: raw.timestamp,
-    facility:  raw.facility ?? raw.hospital_name ?? 'System',
+    timestamp: raw.triggered_at,
+    facility:  raw.hospital_name ?? 'System',
   };
 }
 
-/**
- * fetchAlerts — GET /alerts (not yet in contract; always returns demo).
- * Replace the demoFn below with real demo data once the endpoint is agreed.
- */
-export async function fetchAlerts() {
-  return withDemoFallback(
-    () => callApi((client) =>
-      client.get('/alerts').then((r) => r.data.map(mapAlert))
-    ),
-    () => DEMO_ALERTS.map((a) => ({ ...a, source: 'DEMO — synthetic data' }))
-  );
+export async function fetchAlerts(hospitalId = null) {
+  return call((c) => {
+    const params = hospitalId ? { hospital_id: hospitalId } : {};
+    return c.get('/alerts', { params }).then((r) => (r.data?.data ?? []).map(mapAlert));
+  });
 }
 
-/**
- * fetchHealth — GET /health
- * Used by Settings page to show backend connectivity status.
- */
 export async function fetchHealth() {
-  return withDemoFallback(
-    () => callApi((client) =>
-      client.get('/health').then((r) => r.data)
-    ),
-    () => ({ status: 'demo', version: '0.0.0', source: 'DEMO' })
-  );
+  return call((c) => c.get('/health').then((r) => r.data));
 }

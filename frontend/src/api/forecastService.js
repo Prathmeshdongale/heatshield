@@ -1,110 +1,49 @@
 /**
- * forecastService.js
- *
- * Endpoints consumed (from docs/api-contract.md):
- *   GET /demand/historical?days=N
- *   GET /demand/forecast?days=N
- *
- * Response shapes (agreed contract):
- *   historical : [ { date, admissions, er_visits, source }, … ]
- *   forecast   : [ { date, predicted_admissions, lower_ci, upper_ci,
- *                    confidence, source }, … ]
- *
- * This service merges history + forecast into the combined series format
- * expected by DemandChart (type: 'historical' | 'forecast').
+ * forecastService.js — fetches forecast data directly from the API. No demo fallback.
  */
 
-import { callApi, withDemoFallback } from './serviceHelpers.js';
-import { makeForecastSeries }        from '../data/demoPages.js';
+import apiClient, { ApiError } from './client.js';
 
-// ── Mappers ──────────────────────────────────────────────────────────────────
-
-function mapHistoricalRow(row) {
-  return {
-    date:                 row.date,
-    admissions:           row.admissions,
-    er_visits:            row.er_visits,
-    predicted_admissions: null,
-    upper_ci:             null,
-    lower_ci:             null,
-    type:                 'historical',
-    source:               row.source ?? 'api',
-  };
+async function call(fn) {
+  try {
+    const res = await fn(apiClient);
+    return { data: res, error: null, isDemo: false, source: 'api' };
+  } catch (err) {
+    const e = err instanceof ApiError ? err : new ApiError({ message: String(err), raw: err });
+    return { data: null, error: e, isDemo: false, source: 'api' };
+  }
 }
 
 function mapForecastRow(row) {
   return {
-    date:                 row.date,
-    admissions:           null,
-    er_visits:            null,
+    date:                 row.forecast_date,
     predicted_admissions: row.predicted_admissions,
-    upper_ci:             row.upper_ci ?? null,
-    lower_ci:             row.lower_ci ?? null,
-    confidence:           row.confidence ?? null,
+    upper_ci:             row.confidence_upper ?? null,
+    lower_ci:             row.confidence_lower ?? null,
+    risk_status:          row.risk_status,
     type:                 'forecast',
-    source:               row.source ?? 'api',
+    source: 'api',
   };
 }
 
-// ── Service functions ─────────────────────────────────────────────────────────
-
-/**
- * fetchHistoricalDemand — GET /demand/historical?days=N
- *
- * @param {number} days  — history window (default 14)
- */
-export async function fetchHistoricalDemand(days = 14) {
-  return withDemoFallback(
-    () => callApi((client) =>
-      client.get('/demand/historical', { params: { days } })
-        .then((r) => r.data.map(mapHistoricalRow))
-    ),
-    () => makeForecastSeries('all', 7)
-        .filter((r) => r.type === 'historical')
-        .slice(-days)
-        .map((r) => ({ ...r, source: 'DEMO — synthetic data' }))
+export async function fetchDemandForecast(days = 7, hospitalId = 'H001') {
+  return call((c) =>
+    c.get('/forecasts', { params: { hospital_id: hospitalId, days } })
+     .then((r) => (r.data?.data?.points ?? []).map(mapForecastRow))
   );
 }
 
 /**
- * fetchDemandForecast — GET /demand/forecast?days=N
- *
- * @param {number} days  — forecast horizon (default 7)
+ * fetchCombinedDemandSeries — returns forecast-only series (no historical endpoint exists).
  */
-export async function fetchDemandForecast(days = 7) {
-  return withDemoFallback(
-    () => callApi((client) =>
-      client.get('/demand/forecast', { params: { days } })
-        .then((r) => r.data.map(mapForecastRow))
-    ),
-    () => makeForecastSeries('all', days)
-        .filter((r) => r.type === 'forecast')
-        .map((r) => ({ ...r, source: 'DEMO — synthetic data' }))
-  );
+export async function fetchCombinedDemandSeries(historyDays = 14, forecastDays = 7, hospitalId = 'H001') {
+  const result = await fetchDemandForecast(forecastDays, hospitalId);
+  return result;
 }
 
 /**
- * fetchCombinedDemandSeries — fetches history + forecast and merges them
- * into a single chronological array suitable for DemandChart.
- *
- * @param {number} historyDays  — default 14
- * @param {number} forecastDays — default 7
+ * fetchHistoricalDemand — no backend endpoint. Returns empty array.
  */
-export async function fetchCombinedDemandSeries(historyDays = 14, forecastDays = 7) {
-  const [histResult, forecastResult] = await Promise.all([
-    fetchHistoricalDemand(historyDays),
-    fetchDemandForecast(forecastDays),
-  ]);
-
-  const merged = [
-    ...(histResult.data ?? []),
-    ...(forecastResult.data ?? []),
-  ];
-
-  // Both failed → isDemo true; either succeeded from API → isDemo false
-  const isDemo  = histResult.isDemo && forecastResult.isDemo;
-  const error   = histResult.error ?? forecastResult.error ?? null;
-  const source  = isDemo ? 'demo' : 'api';
-
-  return { data: merged, isDemo, error, source };
+export async function fetchHistoricalDemand() {
+  return { data: [], error: null, isDemo: false, source: 'api' };
 }

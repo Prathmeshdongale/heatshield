@@ -37,10 +37,6 @@ class DataStatus(BaseModel):
 
     @classmethod
     def from_source(cls, source: str) -> "DataStatus":
-        """
-        Factory that sets the note text based on data_source.
-        Use this everywhere instead of constructing DataStatus() directly.
-        """
         if source == "live":
-            return cls(data_source="live", note="Live data")
-        return cls(data_source="demo", note="DEMO DATA — not real hospital information")
+            return cls(data_source="live", note="Live data from Supabase")
+        return cls(data_source="demo", note="Data source unavailable")

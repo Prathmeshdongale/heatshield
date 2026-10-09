@@ -1,9 +1,6 @@
 """
 forecasts.py — Demand forecast endpoint.
-Delegates entirely to forecast_service.
-
-503 is returned when the ML model is unavailable in live mode.
-The route never substitutes fabricated data on model failure.
+All data comes from Supabase — no demo fallback.
 """
 
 from fastapi import APIRouter, HTTPException, Query
@@ -25,8 +22,7 @@ router = APIRouter()
     summary="Get demand forecast for a hospital",
     responses={
         404: {"description": "Hospital not found"},
-        422: {"description": "Invalid query parameters"},
-        503: {"description": "ML model unavailable"},
+        503: {"description": "ML model unavailable or DB unreachable"},
     },
 )
 def get_forecast_route(
@@ -45,7 +41,11 @@ def get_forecast_route(
             status_code=503,
             detail={"error": str(exc), "code": "FORECAST_UNAVAILABLE"},
         )
-
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail={"error": str(exc), "code": "DB_UNAVAILABLE"},
+        )
     return ForecastEnvelope(
         data=ForecastResponse(**forecast),
         status=DataStatus.from_source(source),

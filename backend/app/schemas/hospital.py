@@ -26,9 +26,10 @@ class HospitalSummary(BaseModel):
     name: str = Field(..., examples=["City General Hospital"])
     region: str = Field(..., examples=["Greater London"])
     capacity_total: int = Field(..., ge=1, examples=[300])
-    capacity_available: int = Field(..., ge=0, examples=[72])
-    occupancy_pct: float = Field(..., ge=0, le=100, examples=[76.0])
-    risk_status: RiskStatus = Field(..., examples=["amber"])
+    capacity_available: int = Field(0, ge=0, examples=[72])
+    # DB allows up to 200 (overflow scenario) but typical range is 0-100
+    occupancy_pct: float = Field(0.0, ge=0, le=200, examples=[76.0])
+    risk_status: RiskStatus = Field(RiskStatus.green, examples=["amber"])
 
 
 class HospitalDetail(HospitalSummary):

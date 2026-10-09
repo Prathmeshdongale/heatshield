@@ -47,7 +47,6 @@ function StatusBanner({ riskLevel = 'medium', message, freshness, loading = fals
             🕐 Data refreshed {freshness} min ago
           </span>
         )}
-        <span className="demo-badge">DEMO DATA</span>
       </div>
     </div>
   );

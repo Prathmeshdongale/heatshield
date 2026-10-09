@@ -42,7 +42,7 @@ function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <span className="demo-badge">DEMO DATA</span>
+        <span style={{ fontSize: 11, color: '#94a3b8' }}>HeatShield v1.0</span>
       </div>
     </aside>
   );

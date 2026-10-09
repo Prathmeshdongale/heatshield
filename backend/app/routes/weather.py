@@ -1,6 +1,6 @@
 """
 weather.py — Weather observations endpoint.
-Delegates entirely to weather_service.
+All data comes from Supabase — no demo fallback.
 """
 
 from fastapi import APIRouter, HTTPException, Query
@@ -17,8 +17,8 @@ router = APIRouter()
     tags=["Weather"],
     summary="Get weather observations for a hospital region",
     responses={
-        404: {"description": "Hospital not found"},
         422: {"description": "Invalid query parameters"},
+        503: {"description": "Database unavailable"},
     },
 )
 def get_weather_route(
@@ -27,11 +27,10 @@ def get_weather_route(
 ):
     try:
         weather, source = get_weather(hospital_id, days)
-    except KeyError:
-        raise HTTPException(
-            status_code=404,
-            detail={"error": f"Hospital '{hospital_id}' not found", "code": "HOSPITAL_NOT_FOUND"},
-        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail={"error": str(exc)})
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail={"error": str(exc), "code": "DB_UNAVAILABLE"})
     return WeatherEnvelope(
         data=WeatherResponse(**weather),
         status=DataStatus.from_source(source),

@@ -55,7 +55,6 @@ function WeatherChart({ data = [], loading = false, error = false }) {
             {entry.name}: <strong>{entry.value}</strong>
           </p>
         ))}
-        <p className="chart-tooltip__demo">⚠ Demo data only</p>
       </div>
     );
   }
@@ -64,7 +63,6 @@ function WeatherChart({ data = [], loading = false, error = false }) {
     <section className="chart-container" aria-label="7-day weather trend">
       <div className="chart-header">
         <h2 className="chart-title">7-Day Weather Trend</h2>
-        <span className="demo-badge">DEMO DATA</span>
       </div>
 
       <ResponsiveContainer width="100%" height={260}>

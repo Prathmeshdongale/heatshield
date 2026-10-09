@@ -1,101 +1,68 @@
 /**
- * hospitalService.js
- *
- * Endpoints consumed (from docs/api-contract.md):
- *   GET /hospitals
- *   GET /hospitals/{id}/risk
- *
- * Response shapes (agreed contract):
- *   hospitals : [ { id, name, region, total_beds, icu_beds }, … ]
- *   risk      : { hospital_id, date, occupancy_pct, risk_level,
- *                 predicted_surge, source }
- *
- * Note on field naming: the backend uses "id" on the /hospitals list,
- * but "hospital_id" on the risk endpoint. The mapper normalises both
- * to hospital_id for consistency across the UI.
+ * hospitalService.js — fetches hospital data directly from the API.
+ * No demo fallback. Returns { data, error, source } where source is always 'api'.
  */
 
-import { callApi, withDemoFallback } from './serviceHelpers.js';
-import {
-  DEMO_HOSPITAL_LIST_SUMMARY,
-  DEMO_HOSPITAL_DETAILS,
-} from '../data/demoPages.js';
+import apiClient, { ApiError } from './client.js';
 
-// ── Mappers ──────────────────────────────────────────────────────────────────
+const RISK_MAP = {
+  green: 'low', amber: 'medium', red: 'high', critical: 'critical',
+  low: 'low', medium: 'medium', high: 'high',
+};
+function normaliseRisk(raw) { return RISK_MAP[raw] ?? 'unknown'; }
 
 function mapHospital(raw) {
   return {
-    hospital_id:  raw.hospital_id ?? raw.id,
-    name:         raw.name,
-    region:       raw.region,
-    total_beds:   raw.total_beds,
-    icu_beds:     raw.icu_beds,
-    source:       raw.source ?? 'api',
+    hospital_id:       raw.hospital_id,
+    name:              raw.name,
+    region:            raw.region,
+    total_beds:        raw.capacity_total,
+    capacity_available: raw.capacity_available,
+    icu_beds:          raw.icu_beds ?? null,
+    occupancy_pct:     raw.occupancy_pct,
+    icu_occupancy_pct: raw.icu_occupancy_pct ?? null,
+    ed_occupancy_pct:  raw.ed_occupancy_pct ?? null,
+    risk_level:        normaliseRisk(raw.risk_status),
+    risk_status:       raw.risk_status,
+    predicted_surge:   raw.predicted_surge ?? null,
+    source: 'api',
   };
 }
 
 function mapHospitalRisk(raw) {
   return {
-    hospital_id:   raw.hospital_id,
-    date:          raw.date,
-    occupancy_pct: raw.occupancy_pct,
-    risk_level:    raw.risk_level,
-    predicted_surge: raw.predicted_surge,
-    source:        raw.source ?? 'api',
+    hospital_id:    raw.hospital_id,
+    date:           raw.updated_at?.slice(0, 10) ?? new Date().toISOString().slice(0, 10),
+    occupancy_pct:  raw.occupancy_pct,
+    risk_level:     normaliseRisk(raw.risk_status),
+    predicted_surge: raw.predicted_surge ?? null,
+    source: 'api',
   };
 }
 
-// ── Service functions ─────────────────────────────────────────────────────────
+async function call(fn) {
+  try {
+    const res = await fn(apiClient);
+    return { data: res, error: null, isDemo: false, source: 'api' };
+  } catch (err) {
+    const e = err instanceof ApiError ? err : new ApiError({ message: String(err), raw: err });
+    return { data: null, error: e, isDemo: false, source: 'api' };
+  }
+}
 
-/**
- * fetchHospitals — GET /hospitals
- * Returns list of all registered hospitals.
- */
 export async function fetchHospitals() {
-  return withDemoFallback(
-    () => callApi((client) =>
-      client.get('/hospitals').then((r) => r.data.map(mapHospital))
-    ),
-    () => DEMO_HOSPITAL_LIST_SUMMARY.map((h) => ({ ...h, source: 'DEMO — synthetic data' }))
-  );
+  return call((c) => c.get('/hospitals').then((r) => (r.data?.data ?? []).map(mapHospital)));
 }
 
-/**
- * fetchHospitalRisk — GET /hospitals/{id}/risk
- * Returns capacity risk data for one hospital.
- *
- * @param {string} hospitalId
- */
 export async function fetchHospitalRisk(hospitalId) {
-  return withDemoFallback(
-    () => callApi((client) =>
-      client.get(`/hospitals/${hospitalId}/risk`).then((r) => mapHospitalRisk(r.data))
-    ),
-    () => {
-      const detail = DEMO_HOSPITAL_DETAILS[hospitalId];
-      if (!detail) return null;
-      return {
-        hospital_id:    detail.hospital_id,
-        date:           new Date().toISOString().slice(0, 10),
-        occupancy_pct:  detail.occupancy_pct,
-        risk_level:     detail.risk_level,
-        predicted_surge: detail.predicted_surge,
-        source:         'DEMO — synthetic data',
-      };
-    }
+  return call((c) =>
+    c.get(`/hospitals/${hospitalId}`).then((r) => mapHospitalRisk(r.data?.data ?? {}))
   );
 }
 
-/**
- * fetchAllHospitalsWithRisk — fetches the hospital list then fetches risk
- * for each one in parallel and merges the results.
- * Returns merged rows ready for RiskTable.
- */
 export async function fetchAllHospitalsWithRisk() {
   const listResult = await fetchHospitals();
-  if (!listResult.data?.length) {
-    return { data: [], isDemo: listResult.isDemo, error: listResult.error, source: listResult.source };
-  }
+  if (listResult.error || !listResult.data?.length) return listResult;
 
   const riskResults = await Promise.all(
     listResult.data.map((h) => fetchHospitalRisk(h.hospital_id))
@@ -106,13 +73,6 @@ export async function fetchAllHospitalsWithRisk() {
     ...(riskResults[i]?.data ?? {}),
   }));
 
-  const anyIsDemo = listResult.isDemo || riskResults.some((r) => r.isDemo);
-  const firstErr  = listResult.error ?? riskResults.find((r) => r.error)?.error ?? null;
-
-  return {
-    data:   merged,
-    isDemo: anyIsDemo,
-    error:  firstErr,
-    source: anyIsDemo ? 'demo' : 'api',
-  };
+  const firstErr = listResult.error ?? riskResults.find((r) => r.error)?.error ?? null;
+  return { data: merged, error: firstErr, isDemo: false, source: 'api' };
 }

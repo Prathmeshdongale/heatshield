@@ -63,7 +63,6 @@ function AlertsPanel({ alerts = [], loading = false, error = false }) {
     <section className="alerts-panel" aria-label="Recent alerts">
       <div className="chart-header">
         <h2 className="chart-title">Recent Alerts</h2>
-        <span className="demo-badge">DEMO DATA</span>
       </div>
 
       {error && (

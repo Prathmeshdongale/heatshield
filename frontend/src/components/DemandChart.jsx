@@ -81,7 +81,6 @@ function DemandChart({
             </p>
           )
         ))}
-        <p className="chart-tooltip__demo">⚠ Demo data only</p>
       </div>
     );
   }
@@ -90,7 +89,6 @@ function DemandChart({
     <section className="chart-container" aria-label={title}>
       <div className="chart-header">
         <h2 className="chart-title">{title}</h2>
-        <span className="demo-badge">DEMO DATA</span>
       </div>
 
       <ResponsiveContainer width="100%" height={300}>
@@ -150,7 +148,7 @@ function DemandChart({
               type="monotone"
               dataKey={forecastKey}
               stroke="#8b5cf6"
-              name="Forecast (synthetic)"
+              name="Forecast"
               dot={false}
               strokeWidth={2}
               strokeDasharray="6 3"
