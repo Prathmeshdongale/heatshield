@@ -109,7 +109,10 @@ class SupabaseHTTPClient:
             r.raise_for_status()
             return True
         except httpx.HTTPStatusError as exc:
-            logger.error("Supabase INSERT %s failed: %s %s", table, exc.response.status_code, exc.response.text[:200])
+            if exc.response.status_code == 401:
+                logger.debug("Supabase INSERT %s blocked by RLS (publishable key is read-only)", table)
+            else:
+                logger.error("Supabase INSERT %s failed: %s %s", table, exc.response.status_code, exc.response.text[:200])
             return False
         except Exception as exc:
             logger.error("Supabase INSERT %s error: %s", table, exc)

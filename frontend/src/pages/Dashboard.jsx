@@ -23,7 +23,7 @@ function riskColor(level) { return RISK_COLORS[level] ?? '#94a3b8'; }
 function computeSummary(weatherCurrent, hospitals, demandSeries) {
   const forecastRows = (demandSeries ?? []).filter((r) => r.type === 'forecast');
   const peakRow = forecastRows.reduce(
-    (best, r) => (r.predicted_admissions > (best?.predicted_admissions ?? -Infinity) ? r : best),
+    (best, r) => ((r.predicted_admissions ?? 0) > (best?.predicted_admissions ?? -Infinity) ? r : best),
     null
   );
   const atRisk = (hospitals ?? []).filter(

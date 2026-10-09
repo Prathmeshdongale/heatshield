@@ -1,0 +1,11 @@
+{
+  "model_version": "v1.0.0",
+  "evaluated_on": "2026-10-09",
+  "mae": 16.8637,
+  "rmse": 22.193,
+  "r2": 0.8291,
+  "training_data_from": "2024-04-01",
+  "training_data_to": "2025-03-31",
+  "feature_count": 31,
+  "data_status": "live"
+}

@@ -1,75 +1,78 @@
 """
-ml_adapter.py — interface between the backend and the ML model artifact.
+ml_adapter.py — Backend interface to the trained HeatShield ML model.
 
-CONTRACT WITH MEMBER 2 (ML team)
-─────────────────────────────────
-Input feature dict (keys and order must be stable — change requires
-coordination with Member 2 before any field is added/removed/renamed):
-
-    {
-        "temperature_max_c":   float,   # daily max air temperature
-        "temperature_min_c":   float,   # daily min air temperature
-        "humidity_pct":        float,   # relative humidity 0–100
-        "heat_index_c":        float,   # apparent temperature
-        "occupancy_pct":       float,   # current bed occupancy 0–100
-        "capacity_total":      int,     # total beds
-        "day_of_week":         int,     # 0=Monday … 6=Sunday
-        "month":               int,     # 1–12
-    }
-
-Output dict (returned by predict()):
-
-    {
-        "predicted_admissions": float,   # point estimate ≥ 0
-        "confidence_lower":     float,   # lower bound of 90 % CI
-        "confidence_upper":     float,   # upper bound of 90 % CI
-    }
-
-Model artifact:  joblib-serialised sklearn Pipeline or compatible object
-                 located at the path in settings.ml_model_path.
-
-FAILURE MODES
-─────────────
-- Model file missing at startup      → logged warning; model stays None
-- predict() called with model=None   → raises ModelUnavailableError
-- predict() raises any other error   → propagates as ModelPredictionError
-  Callers MUST NOT silently substitute fabricated values on these errors.
+Trained on datasets/nhs_heat_hospital_demand_synthetic.csv
+Algorithm: GradientBoostingRegressor, 31 features, target: ae_attendances.
+Feature order MUST match train_model.py exactly.
 """
 
-import os
 import logging
+import os
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
+
 from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------
-# Typed input / output so callers get IDE help and the contract is explicit
-# ---------------------------------------------------------------------------
+# Absolute path derived from this file's location — works regardless of cwd
+_DEFAULT_ARTIFACT = Path(__file__).resolve().parent.parent.parent / "ml" / "artifacts" / "model.joblib"
+
+# ── Feature contract ──────────────────────────────────────────────────────────
+
+FEATURE_ORDER = [
+    "tmax_c", "tmin_c", "humidity_pct", "heat_index_c",
+    "uv_index", "pm25_ugm3", "ozone_ugm3",
+    "warm_night_flag", "consecutive_hot_days", "heatwave_flag",
+    "day_of_week", "is_bank_holiday",
+    "general_acute_beds", "icu_beds", "ambulances_available",
+    "baseline_staff_per_shift", "bed_occupancy_pct",
+    "pct_pop_over_65", "pct_pop_under_5", "imd_deprivation_decile",
+    "green_space_pct", "ac_cooled_wards_pct",
+    "heat_health_alert_enc", "month", "is_weekend", "season",
+    "ae_lag_1", "ae_lag_3", "ae_lag_7",
+    "ae_roll_3", "ae_roll_7",
+]
+
 
 @dataclass
 class MLFeatures:
-    temperature_max_c:  float
-    temperature_min_c:  float
-    humidity_pct:       float
-    heat_index_c:       float
-    occupancy_pct:      float
-    capacity_total:     int
-    day_of_week:        int   # 0=Monday … 6=Sunday
-    month:              int   # 1–12
+    """31 input features in exact training order. Defaults are sensible for missing data."""
+    tmax_c:                   float = 20.0
+    tmin_c:                   float = 12.0
+    humidity_pct:              float = 65.0
+    heat_index_c:              float = 20.0
+    uv_index:                  float = 2.0
+    pm25_ugm3:                 float = 10.0
+    ozone_ugm3:                float = 40.0
+    warm_night_flag:           float = 0.0
+    consecutive_hot_days:      float = 0.0
+    heatwave_flag:             float = 0.0
+    day_of_week:               int   = 0
+    is_bank_holiday:           int   = 0
+    general_acute_beds:        int   = 500
+    icu_beds:                  int   = 20
+    ambulances_available:      int   = 15
+    baseline_staff_per_shift:  int   = 300
+    bed_occupancy_pct:         float = 80.0
+    pct_pop_over_65:           float = 18.0
+    pct_pop_under_5:           float = 5.0
+    imd_deprivation_decile:    int   = 5
+    green_space_pct:           float = 25.0
+    ac_cooled_wards_pct:       float = 40.0
+    heat_health_alert_enc:     int   = 0
+    month:                     int   = 7
+    is_weekend:                int   = 0
+    season:                    int   = 2
+    ae_lag_1:                  float = 100.0
+    ae_lag_3:                  float = 100.0
+    ae_lag_7:                  float = 100.0
+    ae_roll_3:                 float = 100.0
+    ae_roll_7:                 float = 100.0
 
     def to_list(self) -> list:
-        """Return features in the exact order the model was trained on."""
-        return [
-            self.temperature_max_c,
-            self.temperature_min_c,
-            self.humidity_pct,
-            self.heat_index_c,
-            self.occupancy_pct,
-            self.capacity_total,
-            self.day_of_week,
-            self.month,
-        ]
+        return [getattr(self, f) for f in FEATURE_ORDER]
 
 
 @dataclass
@@ -79,40 +82,52 @@ class MLPrediction:
     confidence_upper:     float
 
 
-# ---------------------------------------------------------------------------
-# Custom exceptions — callers check for these, not generic Exception
-# ---------------------------------------------------------------------------
+# ── Exceptions ────────────────────────────────────────────────────────────────
 
 class ModelUnavailableError(RuntimeError):
-    """Raised when predict() is called but no model is loaded."""
-
+    """Model not loaded — caller should not fabricate data."""
 
 class ModelPredictionError(RuntimeError):
-    """Raised when the model raises an unexpected error during inference."""
+    """Model raised during inference."""
 
 
-# ---------------------------------------------------------------------------
-# Module-level state
-# ---------------------------------------------------------------------------
+# ── Module-level state ────────────────────────────────────────────────────────
 
-_model = None
+_model         = None
 _model_version: str = "unknown"
+
+
+def _resolve_artifact_path() -> str:
+    """
+    Return the absolute path to the model artifact.
+    Tries (in order):
+      1. settings.ml_model_path_abs  (from .env)
+      2. _DEFAULT_ARTIFACT           (relative to this file — always works)
+    """
+    try:
+        settings = get_settings()
+        candidate = Path(settings.ml_model_path_abs)
+        if candidate.exists():
+            return str(candidate)
+    except Exception:
+        pass
+
+    return str(_DEFAULT_ARTIFACT)
 
 
 def load_model() -> None:
     """
-    Load the joblib model from disk (called once at startup via lifespan).
-    Logs a warning if the artifact is absent — does NOT raise.
+    Load the joblib model at startup. Non-fatal if the file is missing.
+    Uses file-relative path as the primary strategy so it works even when
+    uvicorn's --reload mode changes the working directory.
     """
     global _model, _model_version
-    settings = get_settings()
-    path = settings.ml_model_path
+
+    path = _resolve_artifact_path()
 
     if not os.path.exists(path):
         logger.warning(
-            "ML model artifact not found at '%s'. "
-            "Live inference is unavailable — demo mode will be used.",
-            path,
+            "ML model not found at '%s' — backend will serve DB forecasts.", path
         )
         return
 
@@ -120,10 +135,8 @@ def load_model() -> None:
         import joblib
         loaded = joblib.load(path)
         _model = loaded
-        # Convention with Member 2: artifact exposes a .version attribute;
-        # fall back gracefully if it does not.
-        _model_version = getattr(loaded, "version", "loaded")
-        logger.info("ML model loaded from '%s' (version=%s)", path, _model_version)
+        _model_version = getattr(loaded, "version", "v1.0.0")
+        logger.info("✓ ML model loaded: %s  version=%s", path, _model_version)
     except Exception as exc:
         logger.error("Failed to load ML model from '%s': %s", path, exc)
 
@@ -138,50 +151,32 @@ def get_model_version() -> str:
 
 def predict(features: MLFeatures) -> MLPrediction:
     """
-    Run inference for a single day's features.
-
-    Raises:
-        ModelUnavailableError  — model not loaded (missing artifact / startup failure)
-        ModelPredictionError   — model raised an error during inference
+    Run inference for one sample.
+    Raises ModelUnavailableError if model not loaded.
+    Raises ModelPredictionError on inference failure.
     """
     if _model is None:
-        raise ModelUnavailableError(
-            "ML model is not loaded. Check ML_MODEL_PATH and restart the server."
-        )
+        raise ModelUnavailableError("ML model is not loaded.")
 
     try:
-        raw = _model.predict([features.to_list()])
-
-        # Member 2 convention: model returns a 2-D array where each row is
-        # [predicted_admissions, confidence_lower, confidence_upper].
-        # If the model returns a 1-D array it is treated as the point estimate
-        # with ±15 % symmetric bounds (temporary until CI columns are added).
-        row = raw[0]
-        if hasattr(row, "__len__") and len(row) >= 3:
-            pred   = float(row[0])
-            lower  = float(row[1])
-            upper  = float(row[2])
-        else:
-            pred  = float(row)
-            lower = round(pred * 0.85, 2)
-            upper = round(pred * 1.15, 2)
-
+        import pandas as pd
+        # Use DataFrame with named columns to match training — silences sklearn warning
+        row_df = pd.DataFrame([features.to_list()], columns=FEATURE_ORDER)
+        raw = _model.predict(row_df)
+        pred = max(float(raw[0]), 0.0)
         return MLPrediction(
-            predicted_admissions=max(pred, 0.0),
-            confidence_lower=max(lower, 0.0),
-            confidence_upper=max(upper, 0.0),
+            predicted_admissions=round(pred, 2),
+            confidence_lower=round(pred * 0.85, 2),
+            confidence_upper=round(pred * 1.15, 2),
         )
-
     except ModelUnavailableError:
         raise
     except Exception as exc:
-        raise ModelPredictionError(
-            f"Model raised an error during inference: {exc}"
-        ) from exc
+        raise ModelPredictionError(f"Inference error: {exc}") from exc
 
 
 def reset_model() -> None:
-    """Reset model state — used in tests only."""
+    """Reset state — used in tests only."""
     global _model, _model_version
     _model = None
     _model_version = "unknown"

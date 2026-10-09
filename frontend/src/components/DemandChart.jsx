@@ -142,15 +142,15 @@ function DemandChart({
             />
           ))}
 
-          {/* Forecast line */}
+          {/* Forecast line — real ML predictions */}
           {forecastKey && (
             <Line
               type="monotone"
               dataKey={forecastKey}
               stroke="#8b5cf6"
-              name="Forecast"
-              dot={false}
-              strokeWidth={2}
+              name="ML Forecast"
+              dot={{ fill: '#8b5cf6', r: 3 }}
+              strokeWidth={2.5}
               strokeDasharray="6 3"
               connectNulls={false}
             />

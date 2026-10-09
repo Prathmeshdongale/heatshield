@@ -1,0 +1,26 @@
+trust_id,trust_name,region,hospital_size,urban,general_acute_beds,icu_beds,ambulances_available,baseline_staff_per_shift,pct_pop_over_65,pct_pop_under_5,imd_deprivation_decile,green_space_pct,ac_cooled_wards_pct,catchment_pop
+SYN001,London University Hospitals NHS Trust 01,London,medium,0,577,22,18,352,22.6,4.7,8,10.3,38.6,230691
+SYN002,London Teaching NHS Trust 02,London,small,1,425,19,13,236,19.0,5.3,2,26.8,69.6,187365
+SYN003,London University Hospitals NHS Trust 03,London,medium,0,871,38,36,641,13.0,6.6,10,29.3,37.0,362796
+SYN004,London District General NHS Trust 04,London,small,0,449,16,16,277,16.2,5.6,7,42.4,62.6,201742
+SYN005,South City NHS Trust 05,South East,medium,1,764,33,24,431,26.6,6.2,1,18.6,42.1,324755
+SYN006,South District General NHS Trust 06,South East,large,1,1072,34,36,703,24.8,6.8,7,29.9,42.0,525455
+SYN007,South District General NHS Trust 07,South East,small,1,406,12,14,253,26.2,6.0,9,24.5,56.8,172675
+SYN008,South District General NHS Trust 08,South East,small,1,452,18,16,331,24.9,6.8,4,43.6,28.9,195844
+SYN009,South Teaching NHS Trust 09,South West,medium,1,555,24,23,406,22.0,5.9,10,28.6,55.0,250961
+SYN010,South Teaching NHS Trust 10,South West,large,0,941,35,39,615,26.1,4.9,4,17.0,61.7,445345
+SYN011,South University Hospitals NHS Trust 11,South West,medium,0,688,32,32,512,20.7,5.9,7,38.6,49.5,272482
+SYN012,East City NHS Trust 12,East of England,large,1,1296,54,55,914,14.1,5.4,9,35.8,69.5,494592
+SYN013,East Royal Infirmary NHS Trust 13,East of England,medium,1,712,30,30,450,18.2,6.8,2,36.9,27.2,353313
+SYN014,East University Hospitals NHS Trust 14,East of England,large,1,1060,43,47,648,19.8,6.8,7,12.1,18.9,423902
+SYN015,Midlands Royal Infirmary NHS Trust 15,Midlands,large,1,1265,61,51,944,13.5,5.9,9,17.8,64.0,578615
+SYN016,Midlands City NHS Trust 16,Midlands,small,0,471,17,21,270,26.8,6.4,2,9.6,15.2,231958
+SYN017,Midlands District General NHS Trust 17,Midlands,small,0,371,18,17,245,23.9,5.3,7,32.2,44.5,192520
+SYN018,Midlands General NHS Trust 18,Midlands,medium,1,726,27,34,456,22.5,5.8,6,40.6,55.5,284077
+SYN019,North General NHS Trust 19,North West,medium,1,799,30,26,598,26.0,6.2,1,44.5,47.8,411685
+SYN020,North Royal Infirmary NHS Trust 20,North West,small,0,390,13,14,260,27.0,6.3,7,41.9,50.5,196104
+SYN021,North District General NHS Trust 21,North West,medium,1,593,24,21,419,24.5,5.3,8,19.8,16.5,239165
+SYN022,North City NHS Trust 22,North East and Yorkshire,medium,0,761,33,35,563,19.3,4.7,8,14.3,49.5,332412
+SYN023,North City NHS Trust 23,North East and Yorkshire,medium,1,783,29,29,559,22.6,6.0,10,25.1,12.4,319586
+SYN024,North Teaching NHS Trust 24,North East and Yorkshire,small,0,484,15,16,278,16.8,5.0,4,5.6,26.6,251428
+SYN025,North University Hospitals NHS Trust 25,North East and Yorkshire,medium,1,623,27,23,454,26.0,6.1,10,24.0,28.3,306365

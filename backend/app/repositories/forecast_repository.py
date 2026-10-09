@@ -15,7 +15,7 @@ def fetch_forecast(hospital_id: str, days: int) -> dict:
     if client is None:
         raise RuntimeError("Supabase client not configured")
 
-    hid = hospital_id.upper()
+    hid       = hospital_id.upper()
     today     = date.today()
     date_from = str(today + timedelta(days=1))
     date_to   = str(today + timedelta(days=days))
@@ -61,6 +61,11 @@ def fetch_forecast(hospital_id: str, days: int) -> dict:
 
 
 def save_forecast_points(hospital_id: str, points: list[dict], model_version: str) -> bool:
+    """
+    Persist ML forecast points to Supabase.
+    Requires service-role key (RLS blocks INSERT with publishable key).
+    Silently skips on 401 — predictions are still returned to the frontend.
+    """
     client = get_supabase()
     if client is None:
         return False
@@ -78,4 +83,11 @@ def save_forecast_points(hospital_id: str, points: list[dict], model_version: st
         }
         for p in points
     ]
-    return client.insert("forecasts", rows)
+    result = client.insert("forecasts", rows)
+    if not result:
+        logger.debug(
+            "Forecast INSERT skipped for %s (publishable key is SELECT-only — "
+            "add SUPABASE_SECRET_KEY to backend/.env to persist predictions).",
+            hospital_id,
+        )
+    return result

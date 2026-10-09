@@ -16,19 +16,14 @@ async function call(fn) {
 
 function mapModelMetrics(raw) {
   return {
-    model_name:    raw.model_version,
-    version:       raw.model_version,
+    model_name:    raw.model_version ?? 'v1.0.0',
+    version:       raw.model_version ?? 'v1.0.0',
     trained_at:    raw.evaluated_on,
-    mae:           raw.mae,
-    rmse:          raw.rmse,
-    r2:            raw.r2,
+    mae:           typeof raw.mae  === 'number' ? Math.round(raw.mae  * 100) / 100 : raw.mae,
+    rmse:          typeof raw.rmse === 'number' ? Math.round(raw.rmse * 100) / 100 : raw.rmse,
+    r2:            typeof raw.r2   === 'number' ? Math.round(raw.r2   * 10000) / 10000 : raw.r2,
     feature_count: raw.feature_count,
-    mape:          null,
-    baseline_mae:  null,
-    baseline_rmse: null,
-    training_rows: null,
-    training_duration_s: null,
-    source: 'api',
+    source:        'api',
   };
 }
 

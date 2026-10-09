@@ -1,48 +1,47 @@
 """
 config.py — application settings loaded from environment variables / .env file.
-All other modules import `get_settings()` rather than reading os.environ directly.
 """
 
+import os
 from functools import lru_cache
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Backend package root (the directory containing this file's parent)
+_BACKEND_DIR = Path(__file__).parent.parent
 
 
 class Settings(BaseSettings):
-    # -----------------------------------------------------------------
     # App
-    # -----------------------------------------------------------------
-    app_env: str = "development"
-    app_host: str = "0.0.0.0"
-    app_port: int = 8000
+    app_env:    str = "development"
+    app_host:   str = "0.0.0.0"
+    app_port:   int = 8000
     secret_key: str = "change-me"
 
-    # -----------------------------------------------------------------
     # CORS
-    # -----------------------------------------------------------------
-    # Stored as a comma-separated string in .env, parsed to a list here.
     cors_origins: str = "http://localhost:5173"
 
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",")]
 
-    # -----------------------------------------------------------------
-    # Supabase  — publishable/anon key only, never the service-role key
-    # -----------------------------------------------------------------
-    supabase_url: str = ""
+    # Supabase
+    supabase_url:             str = ""
     supabase_publishable_key: str = ""
 
-    # -----------------------------------------------------------------
     # Demo mode
-    # Set DEMO_MODE=true to serve synthetic data even when DB / ML are
-    # available. Useful for presentations. Always false in production.
-    # -----------------------------------------------------------------
-    demo_mode: bool = True
+    demo_mode: bool = False
 
-    # -----------------------------------------------------------------
-    # ML
-    # -----------------------------------------------------------------
-    ml_model_path: str = "../ml/artifacts/model.joblib"
+    # ML model path — relative paths resolved from backend/ directory
+    ml_model_path: str = "ml/artifacts/model.joblib"
+
+    @property
+    def ml_model_path_abs(self) -> str:
+        """Return absolute path to the model artifact."""
+        p = Path(self.ml_model_path)
+        if p.is_absolute():
+            return str(p)
+        return str(_BACKEND_DIR / p)
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -53,5 +52,4 @@ class Settings(BaseSettings):
 
 @lru_cache
 def get_settings() -> Settings:
-    """Return a cached Settings instance (parsed once at startup)."""
     return Settings()

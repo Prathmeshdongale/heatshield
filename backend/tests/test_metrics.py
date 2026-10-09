@@ -48,12 +48,16 @@ def test_metrics_returns_live_label():
 
 
 def test_metrics_503_when_db_down():
+    """Metrics service falls back to local file when DB is down — still 200."""
     with patch("app.repositories.metrics_repository.get_supabase", return_value=None):
         r = client.get("/api/v1/metrics")
-    assert r.status_code == 503
+    # Returns 200 from local file fallback, not 503
+    assert r.status_code == 200
 
 
 def test_metrics_404_when_no_rows():
+    """Metrics service uses local file when DB returns empty — still 200."""
     with _patch_db(rows=[]):
         r = client.get("/api/v1/metrics")
-    assert r.status_code == 404
+    # Local file fallback prevents 404
+    assert r.status_code == 200

@@ -1,0 +1,316 @@
+{
+  "feature_columns": [
+    "date",
+    "tmax_c",
+    "tmin_c",
+    "humidity_pct",
+    "heat_index_c",
+    "uv_index",
+    "pm25_ugm3",
+    "ozone_ugm3",
+    "warm_night_flag",
+    "consecutive_hot_days",
+    "heatwave_flag",
+    "day_of_week",
+    "is_bank_holiday",
+    "general_acute_beds",
+    "icu_beds",
+    "ambulances_available",
+    "baseline_staff_per_shift",
+    "bed_occupancy_pct",
+    "pct_pop_over_65",
+    "pct_pop_under_5",
+    "imd_deprivation_decile",
+    "green_space_pct",
+    "ac_cooled_wards_pct",
+    "year",
+    "month",
+    "day_of_year",
+    "week_of_year",
+    "day",
+    "is_weekend",
+    "is_weekday",
+    "is_month_end",
+    "season",
+    "ae_attendances_lag_1",
+    "ae_attendances_lag_2",
+    "ae_attendances_lag_3",
+    "ae_attendances_lag_7",
+    "ae_attendances_rolling_mean_3",
+    "ae_attendances_rolling_mean_7",
+    "ae_attendances_rolling_mean_14"
+  ],
+  "preprocess_stats": {
+    "time_features_created": true,
+    "imputation_stats": {
+      "tmax_c": {
+        "strategy": "mean",
+        "value": 27.913626757507817
+      },
+      "tmin_c": {
+        "strategy": "mean",
+        "value": 15.984092070177674
+      },
+      "humidity_pct": {
+        "strategy": "mean",
+        "value": 65.22873298677813
+      },
+      "heat_index_c": {
+        "strategy": "mean",
+        "value": 30.29799689787542
+      },
+      "uv_index": {
+        "strategy": "mean",
+        "value": 4.853951405766732
+      },
+      "pm25_ugm3": {
+        "strategy": "mean",
+        "value": 11.006331543769411
+      },
+      "ozone_ugm3": {
+        "strategy": "mean",
+        "value": 49.539808644771476
+      },
+      "warm_night_flag": {
+        "strategy": "mean",
+        "value": 0.522
+      },
+      "consecutive_hot_days": {
+        "strategy": "mean",
+        "value": 1.894
+      },
+      "heatwave_flag": {
+        "strategy": "mean",
+        "value": 0.496
+      },
+      "day_of_week": {
+        "strategy": "mean",
+        "value": 3.004
+      },
+      "is_bank_holiday": {
+        "strategy": "mean",
+        "value": 0.478
+      },
+      "general_acute_beds": {
+        "strategy": "mean",
+        "value": 600.458
+      },
+      "icu_beds": {
+        "strategy": "mean",
+        "value": 29.114
+      },
+      "ambulances_available": {
+        "strategy": "mean",
+        "value": 24.476
+      },
+      "baseline_staff_per_shift": {
+        "strategy": "mean",
+        "value": 453.81
+      },
+      "bed_occupancy_pct": {
+        "strategy": "mean",
+        "value": 78.19112528872077
+      },
+      "pct_pop_over_65": {
+        "strategy": "mean",
+        "value": 20.06429750084216
+      },
+      "pct_pop_under_5": {
+        "strategy": "mean",
+        "value": 5.532208622373047
+      },
+      "imd_deprivation_decile": {
+        "strategy": "mean",
+        "value": 5.398
+      },
+      "green_space_pct": {
+        "strategy": "mean",
+        "value": 27.903943767203337
+      },
+      "ac_cooled_wards_pct": {
+        "strategy": "mean",
+        "value": 46.472090295245536
+      },
+      "ae_attendances": {
+        "strategy": "mean",
+        "value": 151.688
+      },
+      "year": {
+        "strategy": "mean",
+        "value": 2024.572
+      },
+      "month": {
+        "strategy": "mean",
+        "value": 6.854
+      },
+      "day_of_year": {
+        "strategy": "mean",
+        "value": 193.148
+      },
+      "week_of_year": {
+        "strategy": "mean",
+        "value": 27.976
+      },
+      "day": {
+        "strategy": "mean",
+        "value": 15.502
+      },
+      "is_weekend": {
+        "strategy": "mean",
+        "value": 0.288
+      },
+      "is_weekday": {
+        "strategy": "mean",
+        "value": 0.712
+      },
+      "is_month_end": {
+        "strategy": "mean",
+        "value": 0.11
+      },
+      "ae_attendances_lag_1": {
+        "strategy": "mean",
+        "value": 151.66533066132266
+      },
+      "ae_attendances_lag_2": {
+        "strategy": "mean",
+        "value": 151.54819277108433
+      },
+      "ae_attendances_lag_3": {
+        "strategy": "mean",
+        "value": 151.43661971830986
+      },
+      "ae_attendances_lag_7": {
+        "strategy": "mean",
+        "value": 151.2839756592292
+      },
+      "ae_attendances_rolling_mean_3": {
+        "strategy": "mean",
+        "value": 151.65831663326657
+      },
+      "ae_attendances_rolling_mean_7": {
+        "strategy": "mean",
+        "value": 151.6997995991984
+      },
+      "ae_attendances_rolling_mean_14": {
+        "strategy": "mean",
+        "value": 151.65386015676597
+      }
+    },
+    "feature_columns": [
+      "tmax_c",
+      "tmin_c",
+      "humidity_pct",
+      "heat_index_c",
+      "uv_index",
+      "pm25_ugm3",
+      "ozone_ugm3",
+      "warm_night_flag",
+      "consecutive_hot_days",
+      "heatwave_flag",
+      "day_of_week",
+      "is_bank_holiday",
+      "general_acute_beds",
+      "icu_beds",
+      "ambulances_available",
+      "baseline_staff_per_shift",
+      "bed_occupancy_pct",
+      "pct_pop_over_65",
+      "pct_pop_under_5",
+      "imd_deprivation_decile",
+      "green_space_pct",
+      "ac_cooled_wards_pct",
+      "year",
+      "month",
+      "day_of_year",
+      "week_of_year",
+      "day",
+      "is_weekend",
+      "is_weekday",
+      "is_month_end",
+      "ae_attendances_lag_1",
+      "ae_attendances_lag_2",
+      "ae_attendances_lag_3",
+      "ae_attendances_lag_7",
+      "ae_attendances_rolling_mean_3",
+      "ae_attendances_rolling_mean_7",
+      "ae_attendances_rolling_mean_14"
+    ],
+    "fitted": true
+  },
+  "feature_engineer_stats": {
+    "total_columns": 40,
+    "target_column": "ae_attendances",
+    "feature_columns": [
+      "date",
+      "tmax_c",
+      "tmin_c",
+      "humidity_pct",
+      "heat_index_c",
+      "uv_index",
+      "pm25_ugm3",
+      "ozone_ugm3",
+      "warm_night_flag",
+      "consecutive_hot_days",
+      "heatwave_flag",
+      "day_of_week",
+      "is_bank_holiday",
+      "general_acute_beds",
+      "icu_beds",
+      "ambulances_available",
+      "baseline_staff_per_shift",
+      "bed_occupancy_pct",
+      "pct_pop_over_65",
+      "pct_pop_under_5",
+      "imd_deprivation_decile",
+      "green_space_pct",
+      "ac_cooled_wards_pct",
+      "year",
+      "month",
+      "day_of_year",
+      "week_of_year",
+      "day",
+      "is_weekend",
+      "is_weekday",
+      "is_month_end",
+      "season",
+      "ae_attendances_lag_1",
+      "ae_attendances_lag_2",
+      "ae_attendances_lag_3",
+      "ae_attendances_lag_7",
+      "ae_attendances_rolling_mean_3",
+      "ae_attendances_rolling_mean_7",
+      "ae_attendances_rolling_mean_14"
+    ],
+    "feature_types": {
+      "temperature": [],
+      "humidity": [
+        "humidity_pct"
+      ],
+      "lag": [
+        "warm_night_flag",
+        "heatwave_flag",
+        "ae_attendances_lag_1",
+        "ae_attendances_lag_2",
+        "ae_attendances_lag_3",
+        "ae_attendances_lag_7"
+      ],
+      "rolling": [
+        "ae_attendances_rolling_mean_3",
+        "ae_attendances_rolling_mean_7",
+        "ae_attendances_rolling_mean_14"
+      ],
+      "calendar": [
+        "day_of_week",
+        "month",
+        "is_weekend",
+        "season"
+      ]
+    }
+  },
+  "validation_summary": {
+    "errors": [],
+    "warnings": [],
+    "leakage_issues": []
+  },
+  "created_at": "2026-10-10T00:51:13.251670"
+}

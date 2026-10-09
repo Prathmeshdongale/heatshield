@@ -23,7 +23,7 @@ const PAGE_TITLES = {
 
 function Header() {
   const { pathname }                        = useLocation();
-  const { isLive, dbConnected, demoMode }   = useHealthCheck();
+  const { isLive, dbConnected, demoMode, modelLoaded } = useHealthCheck();
   const title                               = PAGE_TITLES[pathname] ?? 'HeatShield';
 
   const now = new Date().toLocaleString('en-AU', {
@@ -42,12 +42,17 @@ function Header() {
         <span className="header-timestamp" aria-label="Current date and time">
           {now}
         </span>
-        {isLive && dbConnected ? (
-          <span
-            className="live-badge"
-            aria-label="Data source: live Supabase database"
-            title="Backend connected — reading from Supabase"
-          >
+        {isLive && dbConnected && modelLoaded ? (
+          <span className="live-badge"
+            aria-label="Backend + DB + ML Model all live"
+            title="Backend connected — Supabase DB + ML Model v1.0.0 active">
+            ● LIVE + ML
+          </span>
+        ) : isLive && dbConnected ? (
+          <span className="live-badge"
+            aria-label="Backend and DB connected"
+            title="Backend + Supabase connected. ML model loading…"
+            style={{ backgroundColor: '#3b82f6', color: '#fff' }}>
             ● LIVE + DB
           </span>
         ) : isLive && !demoMode ? (

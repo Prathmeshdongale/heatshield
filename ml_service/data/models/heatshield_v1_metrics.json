@@ -1,0 +1,62 @@
+{
+  "model_version": "v1.0.0",
+  "best_model": "gradient_boosting",
+  "evaluated_on": "2026-10-09",
+  "mae": 16.863696664859937,
+  "rmse": 22.19303690163997,
+  "r2": 0.8291057842920033,
+  "training_data_from": "2024-04-01",
+  "training_data_to": "2025-03-31",
+  "feature_count": 31,
+  "feature_columns": [
+    "tmax_c",
+    "tmin_c",
+    "humidity_pct",
+    "heat_index_c",
+    "uv_index",
+    "pm25_ugm3",
+    "ozone_ugm3",
+    "warm_night_flag",
+    "consecutive_hot_days",
+    "heatwave_flag",
+    "day_of_week",
+    "is_bank_holiday",
+    "general_acute_beds",
+    "icu_beds",
+    "ambulances_available",
+    "baseline_staff_per_shift",
+    "bed_occupancy_pct",
+    "pct_pop_over_65",
+    "pct_pop_under_5",
+    "imd_deprivation_decile",
+    "green_space_pct",
+    "ac_cooled_wards_pct",
+    "heat_health_alert_enc",
+    "month",
+    "is_weekend",
+    "season",
+    "ae_lag_1",
+    "ae_lag_3",
+    "ae_lag_7",
+    "ae_roll_3",
+    "ae_roll_7"
+  ],
+  "target": "ae_attendances",
+  "all_models": {
+    "random_forest": {
+      "mae": 17.08470684519506,
+      "rmse": 22.533403858377397,
+      "r2": 0.8238236963978369
+    },
+    "gradient_boosting": {
+      "mae": 16.863696664859937,
+      "rmse": 22.19303690163997,
+      "r2": 0.8291057842920033
+    },
+    "ridge": {
+      "mae": 17.9293224542886,
+      "rmse": 23.44515614609714,
+      "r2": 0.8092782812896273
+    }
+  }
+}
